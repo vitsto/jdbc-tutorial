@@ -1,23 +1,40 @@
 package com.skypro.entity;
 
+import javax.persistence.*;
+
+@Entity
+@Table(name = "employee")
 public class Employee {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+
+    @Column(name = "first_name")
     private String firstName;
+
+    @Column(name = "last_name")
     private String lastName;
+
     private String gender;
-    private int age;
-    private int cityId;
+    private Integer age;
+
+    @Column(name = "city_id")
+    private Integer cityId;
 
     public Employee() {
     }
 
-    public Employee(int id, String firstName, String lastName, String gender, int age, int cityId) {
-        this.id = id;
+    public Employee(String firstName, String lastName, String gender, int age, int cityId) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.gender = gender;
         this.age = age;
         this.cityId = cityId;
+    }
+
+    public Employee(int id, String firstName, String lastName, String gender, int age, int cityId) {
+        this(firstName, lastName, gender, age, cityId);
+        this.id = id;
     }
 
     public int getId() {
