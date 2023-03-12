@@ -1,5 +1,6 @@
 package com.skypro.dao;
 
+import com.skypro.HibernateManager;
 import com.skypro.entity.Employee;
 
 import java.sql.Connection;
@@ -10,103 +11,66 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
-    private Connection connection;
+    private HibernateManager hibernateManager = new HibernateManager();
+    private volatile Employee employee;
+    private volatile List<Employee> employeeList;
 
-    public EmployeeDAOImpl(Connection connection) {
-        this.connection = connection;
+    public EmployeeDAOImpl() {
+
     }
 
     @Override
     public void createEmployee(Employee employee) {
-        try (PreparedStatement statement = connection.prepareStatement("INSERT INTO employee " +
-                "(first_name, last_name, gender, age, city_id) VALUES (?, ?, ?, ?, ?)")) {
-
-            statement.setString(1, employee.getFirstName());
-            statement.setString(2, employee.getLastName());
-            statement.setString(3, employee.getGender());
-            statement.setInt(4, employee.getAge());
-            statement.setInt(5, employee.getCityId());
-
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        hibernateManager.withEntityManager(em -> {
+            em.persist(employee);
+        });
     }
 
     @Override
     public Employee getEmployee(int id) {
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM employee WHERE id = ?")) {
-            statement.setInt(1, id);
-            final ResultSet resultSet = statement.executeQuery();
-
-            if (resultSet.next()) {
-                int employeeId = resultSet.getInt("id");
-                String firstName = resultSet.getString("first_name");
-                String lastName = resultSet.getString("last_name");
-                String gender = resultSet.getString("gender");
-                int age = resultSet.getInt("age");
-                int cityId = resultSet.getInt("city_id");
-                return new Employee(employeeId, firstName, lastName, gender, age, cityId);
-            }
-            return null;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        hibernateManager.withEntityManager(em -> {
+            employee = em.find(Employee.class, id);
+        });
+        return employee;
     }
 
     @Override
     public List<Employee> getEmployees() {
-        List<Employee> employeeList = new ArrayList<>();
-        try (PreparedStatement statement = connection.prepareStatement("SELECT * FROM employee")) {
-            final ResultSet resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                int employeeId = resultSet.getInt("id");
-                String firstName = resultSet.getString("first_name");
-                String lastName = resultSet.getString("last_name");
-                String gender = resultSet.getString("gender");
-                int age = resultSet.getInt("age");
-                int cityId = resultSet.getInt("city_id");
-                employeeList.add(new Employee(employeeId, firstName, lastName, gender, age, cityId));
-            }
-            return employeeList;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        hibernateManager.withEntityManager(em -> {
+            employeeList = em.createQuery("SELECT employee FROM Employee employee").getResultList();
+        });
+        return employeeList;
     }
 
     @Override
-    public void updateEmployee(int id, Employee employee) {
-        try (PreparedStatement statement = connection.prepareStatement("UPDATE employee " +
-                "SET first_name=?, last_name=?, gender=?, age=?, city_id=? " +
-                "WHERE id=?")) {
+    public void updateEmployee(int id, Employee newEmployee) {
+        hibernateManager.withEntityManager(em -> {
+            employee = em.find(Employee.class, id);
 
-            statement.setString(1, employee.getFirstName());
-            statement.setString(2, employee.getLastName());
-            statement.setString(3, employee.getGender());
-            statement.setInt(4, employee.getAge());
-            statement.setInt(5, employee.getCityId());
-            statement.setInt(6, id);
+            employee.setFirstName(newEmployee.getFirstName());
+            employee.setLastName(newEmployee.getLastName());
+            employee.setAge(newEmployee.getAge());
+            employee.setGender(newEmployee.getGender());
+            employee.setCityId(newEmployee.getCityId());
 
-            statement.executeUpdate();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+            em.persist(employee);
+        });
     }
 
     @Override
     public void deleteEmployee(int id) {
-        try(PreparedStatement statement = connection.prepareStatement(
-                "DELETE FROM employee WHERE id=(?)")) {
-
-            statement.setInt(1, id);
-            statement.executeUpdate();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        hibernateManager.withEntityManager(em -> {
+            em.remove(em.find(Employee.class, id));
+        });
+//        try(PreparedStatement statement = connection.prepareStatement(
+//                "DELETE FROM employee WHERE id=(?)")) {
+//
+//            statement.setInt(1, id);
+//            statement.executeUpdate();
+//
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
     }
 
 }
