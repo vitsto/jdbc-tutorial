@@ -62,15 +62,6 @@ public class EmployeeDAOImpl implements EmployeeDAO {
         hibernateManager.withEntityManager(em -> {
             em.remove(em.find(Employee.class, id));
         });
-//        try(PreparedStatement statement = connection.prepareStatement(
-//                "DELETE FROM employee WHERE id=(?)")) {
-//
-//            statement.setInt(1, id);
-//            statement.executeUpdate();
-//
-//        } catch (SQLException e) {
-//            e.printStackTrace();
-//        }
     }
 
 }
