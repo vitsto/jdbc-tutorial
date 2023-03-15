@@ -18,23 +18,19 @@ public class Employee {
     private String gender;
     private Integer age;
 
-    @Column(name = "city_id")
-    private Integer cityId;
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
+    @JoinColumn(name = "city_id")
+    private City city;
 
     public Employee() {
     }
 
-    public Employee(String firstName, String lastName, String gender, int age, int cityId) {
+    public Employee(String firstName, String lastName, String gender, int age) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.gender = gender;
         this.age = age;
-        this.cityId = cityId;
-    }
-
-    public Employee(int id, String firstName, String lastName, String gender, int age, int cityId) {
-        this(firstName, lastName, gender, age, cityId);
-        this.id = id;
+//        this.city = city;
     }
 
     public int getId() {
@@ -77,12 +73,12 @@ public class Employee {
         this.age = age;
     }
 
-    public int getCityId() {
-        return cityId;
+    public City getCity() {
+        return city;
     }
 
-    public void setCityId(int cityId) {
-        this.cityId = cityId;
+    public void setCity(City city) {
+        this.city = city;
     }
 
     @Override
@@ -93,7 +89,7 @@ public class Employee {
                 ", lastName='" + lastName + '\'' +
                 ", gender='" + gender + '\'' +
                 ", age=" + age +
-                ", cityId=" + cityId +
+                ", city=" + city +
                 '}';
     }
 }
