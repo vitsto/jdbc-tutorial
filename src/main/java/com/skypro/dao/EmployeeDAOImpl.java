@@ -1,6 +1,7 @@
 package com.skypro.dao;
 
 import com.skypro.HibernateManager;
+import com.skypro.entity.City;
 import com.skypro.entity.Employee;
 
 import java.sql.Connection;
@@ -11,7 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EmployeeDAOImpl implements EmployeeDAO {
-    private HibernateManager hibernateManager = new HibernateManager();
+    private HibernateManager hibernateManager = HibernateManager.getInstance();
     private volatile Employee employee;
     private volatile List<Employee> employeeList;
 
@@ -51,8 +52,17 @@ public class EmployeeDAOImpl implements EmployeeDAO {
             employee.setLastName(newEmployee.getLastName());
             employee.setAge(newEmployee.getAge());
             employee.setGender(newEmployee.getGender());
-            employee.setCityId(newEmployee.getCityId());
+            employee.setCity(newEmployee.getCity());
 
+            em.persist(employee);
+        });
+    }
+
+    @Override
+    public void addCity(int cityId, Employee employee) {
+        hibernateManager.withEntityManager(em -> {
+            City city = em.find(City.class, cityId);
+            city.add(employee);
             em.persist(employee);
         });
     }
